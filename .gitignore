@@ -32,6 +32,23 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local scratch (design mocks, prompts — not part of the app)
+/image2.png
+/landingpage.png
+/logo.png
+/newlandingpageimage.png
+/newlogoimg.png
+/sectiontopofthefooter.png
+/webpageui.png
+/webview.png
+/web promte.txt
+/web promte.txt.bak
+/MASTER CURSOR PROMPT*.md
+
+# supabase CLI cache
+supabase/.temp/
 
 # vercel
 .vercel
