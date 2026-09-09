@@ -40,16 +40,25 @@ export function PublicHeader({
     setOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
   return (
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-all duration-300",
         overlay
           ? "bg-transparent"
-          : "glass border-b border-black/[0.04] shadow-[0_1px_3px_rgba(0,0,0,0.06)]",
+          : "border-b border-black/[0.04] bg-background/95 shadow-[0_1px_3px_rgba(0,0,0,0.06)] backdrop-blur-xl",
       )}
     >
-      <div className="page-wrap flex h-16 items-center justify-between gap-4 sm:h-[4.5rem]">
+      <div className="page-wrap flex h-14 items-center justify-between gap-2 sm:h-16 sm:gap-4">
         <BrandLogo
           restaurantName={restaurantName}
           logoUrl={logoUrl}
@@ -78,11 +87,11 @@ export function PublicHeader({
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Link
             href="/cart"
             className={cn(
-              "relative inline-flex size-10 items-center justify-center rounded-xl transition-all duration-200",
+              "relative inline-flex size-11 items-center justify-center rounded-xl transition-all duration-200",
               overlay
                 ? "bg-white/12 text-white ring-1 ring-white/20 hover:bg-white/20"
                 : "bg-white text-primary ring-1 ring-black/[0.06] shadow-sm hover:shadow-md hover:ring-primary/20",
@@ -96,13 +105,15 @@ export function PublicHeader({
               </span>
             ) : null}
           </Link>
-          <Link href="/menu" className="btn-order hidden h-10 px-5 text-xs md:inline-flex">
-            Order now
-          </Link>
+          <div className="hidden lg:block">
+            <Link href="/menu" className="btn-order h-10 px-5 text-xs">
+              Order now
+            </Link>
+          </div>
           <button
             type="button"
             className={cn(
-              "inline-flex size-10 items-center justify-center rounded-xl lg:hidden transition-all duration-200",
+              "inline-flex size-11 items-center justify-center rounded-xl lg:hidden transition-all duration-200",
               overlay
                 ? "bg-white/12 text-white ring-1 ring-white/20"
                 : "bg-white text-primary ring-1 ring-black/[0.06] shadow-sm",
@@ -117,14 +128,17 @@ export function PublicHeader({
       </div>
 
       {open ? (
-        <nav className="glass border-t border-black/[0.04] px-4 py-3 lg:hidden" aria-label="Mobile">
+        <nav
+          className="max-h-[calc(100svh-3.5rem)] overflow-y-auto border-t border-black/[0.06] bg-background px-4 py-3 shadow-lg sm:max-h-[calc(100svh-4rem)] lg:hidden"
+          aria-label="Mobile"
+        >
           <ul className="flex flex-col gap-1">
             {LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   className={cn(
-                    "block rounded-xl px-4 py-3 text-[15px] font-medium transition-colors",
+                    "block rounded-xl px-4 py-3.5 text-[15px] font-medium transition-colors",
                     pathname === link.href
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground/80 hover:bg-black/[0.03]",
@@ -135,9 +149,6 @@ export function PublicHeader({
               </li>
             ))}
           </ul>
-          <Link href="/menu" className="btn-order mt-3 w-full">
-            Order now
-          </Link>
         </nav>
       ) : null}
     </header>

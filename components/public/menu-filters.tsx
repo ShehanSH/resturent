@@ -69,7 +69,7 @@ export function MenuBrowser({
 
   return (
     <div className="mt-8">
-      <div className="sticky top-[4.75rem] z-20 rounded-2xl border border-black/5 bg-[color-mix(in_oklch,var(--cream),white_55%)]/90 p-3 shadow-[0_18px_40px_-28px_rgba(90,18,28,0.55)] backdrop-blur-xl sm:p-4">
+      <div className="sticky top-14 z-20 rounded-2xl border border-black/5 bg-[color-mix(in_oklch,var(--cream),white_55%)]/90 p-3 shadow-[0_18px_40px_-28px_rgba(90,18,28,0.55)] backdrop-blur-xl sm:top-16 sm:p-4">
         <form
           className="relative"
           onSubmit={(event) => {

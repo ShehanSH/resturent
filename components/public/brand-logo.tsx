@@ -30,8 +30,8 @@ export function BrandLogo({
         className={cn(
           "relative shrink-0 overflow-hidden rounded-full bg-white transition-transform duration-200 group-hover:scale-105",
           size === "sm" && "size-11",
-          size === "md" && "size-14",
-          size === "lg" && "size-20",
+          size === "md" && "size-11 sm:size-14",
+          size === "lg" && "size-16 sm:size-20",
           onDark
             ? "ring-2 ring-white/70 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.45)]"
             : "ring-1 ring-black/10 shadow-[0_6px_18px_-8px_rgba(90,18,28,0.35)]",
@@ -52,11 +52,19 @@ export function BrandLogo({
         <span className="min-w-0">
           <span
             className={cn(
-              "font-heading block truncate text-[0.7rem] tracking-[0.22em] uppercase sm:text-xs",
+              "font-heading block text-[0.62rem] leading-tight tracking-[0.14em] uppercase sm:text-xs sm:tracking-[0.18em]",
               onDark ? "text-cream" : "text-primary",
             )}
           >
-            Hot Bread · Beruwala
+            Hot Bread
+          </span>
+          <span
+            className={cn(
+              "font-heading mt-0.5 block text-[0.62rem] leading-tight tracking-[0.14em] uppercase sm:text-xs sm:tracking-[0.18em]",
+              onDark ? "text-cream/90" : "text-primary/90",
+            )}
+          >
+            Beruwala
           </span>
           <span className="sr-only">{restaurantName}</span>
         </span>

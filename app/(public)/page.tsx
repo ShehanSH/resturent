@@ -73,12 +73,12 @@ export default async function HomePage() {
           className="object-cover object-[68%_center]"
         />
         <div className="absolute inset-0 bg-linear-to-r from-black/90 via-black/60 to-black/10" />
-        <div className="page-wrap relative flex min-h-[100svh] flex-col justify-center py-28">
+        <div className="page-wrap relative flex min-h-[100svh] flex-col justify-center pt-[calc(4.25rem+env(safe-area-inset-top))] pb-20 sm:py-28">
           <div className="max-w-xl">
             <p className="font-script text-3xl text-gold sm:text-4xl">
               {settings.tagline || "Freshly Baked. Always Delicious."}
             </p>
-            <h1 className="font-heading mt-4 text-5xl leading-[0.9] tracking-[0.06em] uppercase sm:text-6xl lg:text-7xl">
+            <h1 className="font-heading mt-4 text-4xl leading-[0.95] tracking-[0.06em] uppercase sm:text-6xl lg:text-7xl">
               Hot Bread
               <span className="mt-1 block text-primary">Beruwala</span>
             </h1>
@@ -91,12 +91,12 @@ export default async function HomePage() {
               {settings.description ||
                 "Freshly prepared with quality ingredients. Made with care. Served with pride."}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/menu" className="btn-order">
+            <div className="mt-8 flex w-full max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap">
+              <Link href="/menu" className="btn-order w-full sm:w-auto">
                 <ShoppingBag className="size-4" />
                 Order now
               </Link>
-              <Link href="/menu" className="btn-order-light">
+              <Link href="/menu" className="btn-order-light w-full sm:w-auto">
                 View menu
               </Link>
             </div>
@@ -134,8 +134,8 @@ export default async function HomePage() {
               ))}
             </div>
           )}
-          <div className="mt-12 text-center">
-            <Link href="/menu" className="btn-order min-w-56">
+          <div className="mt-10 text-center sm:mt-12">
+            <Link href="/menu" className="btn-order w-full max-w-xs sm:min-w-56 sm:w-auto">
               View full menu
             </Link>
           </div>
@@ -144,7 +144,7 @@ export default async function HomePage() {
 
       {/* ── WE DELIVER bar above footer ── */}
       <section className="relative overflow-hidden bg-[#3a080c] text-white">
-        <div className="relative aspect-[1772/380] w-full">
+        <div className="relative min-h-[18rem] w-full sm:min-h-0 sm:aspect-[1772/380]">
           <Image
             src={BRAND_DELIVERY_SRC}
             alt="Hot curry and paratha ready for delivery"
@@ -152,22 +152,23 @@ export default async function HomePage() {
             sizes="100vw"
             className="object-cover object-center"
           />
+          <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/35 to-black/20 sm:from-black/50 sm:via-black/15 sm:to-transparent" />
           <div className="absolute inset-0 flex items-center">
-            <div className="page-wrap relative flex w-full items-center">
-              <div className="min-w-0 max-w-[46%] pl-1 sm:max-w-[42%] sm:pl-4 lg:pl-8">
-                <p className="font-script text-lg text-gold sm:text-2xl lg:text-3xl">
+            <div className="page-wrap relative flex w-full flex-col items-start justify-center gap-5 py-8 sm:flex-row sm:items-center sm:py-0">
+              <div className="min-w-0 max-w-lg sm:max-w-[46%] sm:pl-4 lg:pl-8">
+                <p className="font-script text-xl text-gold sm:text-2xl lg:text-3xl">
                   Craving something delicious?
                 </p>
-                <h2 className="font-heading mt-0.5 text-2xl tracking-[0.08em] uppercase sm:text-4xl lg:text-5xl">
+                <h2 className="font-heading mt-0.5 text-3xl tracking-[0.08em] uppercase sm:text-4xl lg:text-5xl">
                   We deliver!
                 </h2>
-                <p className="mt-1 max-w-sm text-[11px] leading-relaxed text-white/85 sm:mt-1.5 sm:text-sm">
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/90 sm:mt-1.5">
                   Enjoy your favorite bread &amp; snacks delivered hot to your doorstep.
                 </p>
               </div>
               <Link
                 href="/menu"
-                className="absolute left-1/2 top-1/2 inline-flex h-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-full border-2 border-white/90 bg-black/25 px-5 text-[11px] font-semibold tracking-[0.14em] text-white uppercase backdrop-blur-[2px] transition hover:bg-white hover:text-[#3a080c] sm:h-12 sm:px-7 sm:text-sm"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border-2 border-white/90 bg-black/30 px-6 text-sm font-semibold tracking-[0.14em] text-white uppercase backdrop-blur-[2px] transition hover:bg-white hover:text-[#3a080c] sm:absolute sm:left-1/2 sm:top-1/2 sm:h-12 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:px-7"
               >
                 <Bike className="size-4" />
                 Order now

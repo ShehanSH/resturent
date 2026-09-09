@@ -80,11 +80,20 @@ export function FormSection({
   );
 }
 
-export function StatCard({ label, value }: { label: string; value: string }) {
+export function StatCard({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+}) {
   return (
     <div className="admin-card p-4 sm:p-5">
       <p className="text-muted-foreground text-xs font-medium">{label}</p>
       <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+      {hint ? <p className="text-muted-foreground mt-1 text-xs">{hint}</p> : null}
     </div>
   );
 }

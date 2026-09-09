@@ -27,7 +27,7 @@ export default async function ContactPage() {
     <div className="page-wrap py-16">
       <SectionHeading eyebrow="Get in touch" title="Contact" />
       <div className="mx-auto mt-12 grid max-w-4xl gap-6 lg:grid-cols-2">
-        <div className="brand-card space-y-5 p-8">
+        <div className="brand-card space-y-5 p-5 sm:p-8">
           <Info
             icon={MapPin}
             label="Address"
@@ -54,15 +54,15 @@ export default async function ContactPage() {
               {opening.label}
             </p>
           ) : null}
-          <div className="flex flex-wrap gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap">
             {settings?.phone ? (
-              <a href={telHref(settings.phone)} className="btn-order">
+              <a href={telHref(settings.phone)} className="btn-order w-full sm:w-auto">
                 Call now
               </a>
             ) : null}
             <a
               href={restaurantMapsUrl(settings?.address)}
-              className="btn-order-outline"
+              className="btn-order-outline w-full sm:w-auto"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -70,7 +70,7 @@ export default async function ContactPage() {
             </a>
           </div>
         </div>
-        <div className="brand-card p-8">
+        <div className="brand-card p-5 sm:p-8">
           <h2 className="font-heading text-xl tracking-wide text-primary uppercase">Opening hours</h2>
           <ul className="mt-5 space-y-1">
             {(settings?.business_hours ?? []).map((entry) => (

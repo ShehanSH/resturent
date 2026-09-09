@@ -1,9 +1,14 @@
 import { AdminPageHeader } from "@/components/admin/page-header";
-import { RangeTabs, StatCard } from "@/components/admin/ui";
-import { formatMoney, formatNumber } from "@/lib/format";
+import { ReportsDashboard } from "@/components/admin/reports-dashboard";
+import { RangeTabs } from "@/components/admin/ui";
+import { buildReportDocument } from "@/lib/reports/model";
+import { parseRangePreset } from "@/lib/reports/range";
 import {
   getAnalyticsSummary,
+  getOrderTypeSplit,
   getOrdersByCategory,
+  getRevenueTrend,
+  getStatusDistribution,
   getTopItems,
   resolveRange,
 } from "@/lib/services/analytics.service";
@@ -11,6 +16,7 @@ import { getRestaurantSettings } from "@/lib/services/settings.service";
 
 const RANGES = [
   { value: "today", label: "Today" },
+  { value: "yesterday", label: "Yesterday" },
   { value: "7d", label: "7 days" },
   { value: "30d", label: "30 days" },
   { value: "90d", label: "90 days" },
@@ -18,68 +24,50 @@ const RANGES = [
 
 export default async function AdminReportsPage({
   searchParams,
-}: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const params = await searchParams;
-  const preset = typeof params.range === "string" ? params.range : "7d";
+  const preset = parseRangePreset(typeof params.range === "string" ? params.range : undefined);
   const settings = await getRestaurantSettings();
-  const range = resolveRange(
-    preset === "today" || preset === "yesterday" || preset === "30d" || preset === "90d" ? preset : "7d",
-    settings.timezone,
-  );
-  const [summary, categories, items] = await Promise.all([
+  const range = resolveRange(preset, settings.timezone);
+  const [summary, categories, items, trend, types, status] = await Promise.all([
     getAnalyticsSummary(range),
     getOrdersByCategory(range),
-    getTopItems(range, 20),
+    getTopItems(range, 25),
+    getRevenueTrend(range),
+    getOrderTypeSplit(range),
+    getStatusDistribution(range),
   ]);
 
+  const report = buildReportDocument({
+    restaurantName: settings.restaurant_name,
+    rangePreset: preset,
+    range,
+    timezone: settings.timezone,
+    locale: settings.locale,
+    currency: {
+      currency: settings.currency,
+      currency_symbol: settings.currency_symbol,
+      locale: settings.locale,
+    },
+    summary,
+    trend,
+    categories,
+    items,
+    types,
+    status,
+  });
+
   return (
-    <div className="space-y-6">
+    <div>
       <AdminPageHeader
         eyebrow="Analytics"
         title="Reports"
-        description="Category and item performance over time."
+        description="Sales, category, and item performance. Download a PDF or Excel file for the selected period."
         action={<RangeTabs basePath="/admin/reports" value={preset} options={RANGES} />}
       />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Orders" value={formatNumber(summary.total_orders, settings.locale)} />
-        <StatCard label="Revenue" value={formatMoney(summary.revenue, settings)} />
-        <StatCard label="Items sold" value={formatNumber(summary.items_sold, settings.locale)} />
-        <StatCard label="Average order" value={formatMoney(summary.average_order_value, settings)} />
-      </div>
-      <section className="admin-card p-5">
-        <h2 className="text-base font-semibold tracking-tight">Category performance</h2>
-        {categories.length === 0 ? (
-          <p className="text-muted-foreground mt-4 text-sm">No category sales in this range.</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-border/70 text-sm">
-            {categories.map((row) => (
-              <li key={row.category_name} className="flex justify-between gap-4 py-2.5">
-                <span>{row.category_name}</span>
-                <span className="text-muted-foreground">
-                  {row.quantity} · {formatMoney(row.revenue, settings)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      <section className="admin-card p-5">
-        <h2 className="text-base font-semibold tracking-tight">Item performance</h2>
-        {items.length === 0 ? (
-          <p className="text-muted-foreground mt-4 text-sm">No item sales in this range.</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-border/70 text-sm">
-            {items.map((row) => (
-              <li key={row.item_name} className="flex justify-between gap-4 py-2.5">
-                <span>{row.item_name}</span>
-                <span className="text-muted-foreground">
-                  {row.quantity} · {formatMoney(row.revenue, settings)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <ReportsDashboard report={report} />
     </div>
   );
 }

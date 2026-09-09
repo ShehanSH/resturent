@@ -33,7 +33,7 @@ export default async function CheckoutPage() {
   const accepting = canAcceptOrders(settings);
 
   return (
-    <div className="page-wrap py-10">
+    <div className="page-wrap py-8 sm:py-10">
       <SectionHeading eyebrow="Almost there" title="Checkout" />
       <p className="mt-4 text-center text-sm text-muted-foreground">Guest checkout — no login required. Payment is cash only.</p>
       {!accepting ? (

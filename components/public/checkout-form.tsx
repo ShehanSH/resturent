@@ -98,7 +98,7 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
   return (
     <form onSubmit={onSubmit} className="grid gap-10 lg:grid-cols-[1fr_22rem]" noValidate>
       <div className="space-y-8">
-        <fieldset className="brand-card space-y-5 p-6">
+        <fieldset className="brand-card space-y-5 p-5 sm:p-6">
           <h2 className="font-heading text-sm tracking-[0.14em] text-primary uppercase">Your details</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
@@ -143,7 +143,7 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
           </div>
         </fieldset>
 
-        <fieldset className="brand-card space-y-5 p-6">
+        <fieldset className="brand-card space-y-5 p-5 sm:p-6">
           <h2 className="font-heading text-sm tracking-[0.14em] text-primary uppercase">Order type</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {(["PICKUP", "DELIVERY"] as const).map((type) => (
@@ -171,7 +171,7 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
         </fieldset>
 
         {orderType === "DELIVERY" ? (
-          <fieldset className="brand-card space-y-5 p-6">
+          <fieldset className="brand-card space-y-5 p-5 sm:p-6">
             <h2 className="font-heading text-sm tracking-[0.14em] text-primary uppercase">Delivery details</h2>
             <div className="space-y-2">
               <FieldLabel htmlFor="delivery_address" required>
@@ -200,7 +200,7 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
           </fieldset>
         ) : null}
 
-        <fieldset className="brand-card space-y-5 p-6">
+        <fieldset className="brand-card space-y-5 p-5 sm:p-6">
           <h2 className="font-heading text-sm tracking-[0.14em] text-primary uppercase">Notes</h2>
           <div className="space-y-2">
             <FieldLabel htmlFor="customer_notes">Order notes</FieldLabel>
@@ -209,7 +209,7 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
         </fieldset>
       </div>
 
-      <aside className="brand-card h-fit space-y-4 p-6">
+      <aside className="brand-card h-fit space-y-4 p-5 sm:p-6 lg:sticky lg:top-24">
         <h2 className="font-heading text-sm tracking-[0.14em] text-primary uppercase">Summary</h2>
         <div className="space-y-2.5">
           {items.map((item) => (

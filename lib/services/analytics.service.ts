@@ -1,5 +1,26 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { OrderStatus, OrderType } from "@/types/database";
+import type {
+  AnalyticsSummary,
+  CategoryPerformance,
+  DateRangeArgs,
+  HourlyPoint,
+  ItemPerformance,
+  StatusSlice,
+  TrendPoint,
+  TypeSlice,
+} from "@/lib/services/analytics.types";
+
+export type {
+  AnalyticsSummary,
+  CategoryPerformance,
+  DateRangeArgs,
+  HourlyPoint,
+  ItemPerformance,
+  StatusSlice,
+  TrendPoint,
+  TypeSlice,
+} from "@/lib/services/analytics.types";
 
 /**
  * Analytics reads.
@@ -7,25 +28,6 @@ import type { OrderStatus, OrderType } from "@/types/database";
  * Every figure is produced by a SQL aggregate behind an authorization check.
  * The browser never receives raw order rows to total up itself.
  */
-
-export interface AnalyticsSummary {
-  total_orders: number;
-  revenue: number;
-  pending_orders: number;
-  active_orders: number;
-  completed_orders: number;
-  cancelled_orders: number;
-  pickup_orders: number;
-  delivery_orders: number;
-  items_sold: number;
-  average_order_value: number;
-  uncollected_payments: number;
-}
-
-export interface DateRangeArgs {
-  from: Date;
-  to: Date;
-}
 
 function toArgs({ from, to }: DateRangeArgs) {
   return { p_from: from.toISOString(), p_to: to.toISOString() };
@@ -53,12 +55,6 @@ export async function getAnalyticsSummary(range: DateRangeArgs): Promise<Analyti
   };
 }
 
-export interface HourlyPoint {
-  hour: number;
-  orders: number;
-  revenue: number;
-}
-
 export async function getOrdersByHour(range: DateRangeArgs): Promise<HourlyPoint[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("analytics_orders_by_hour", toArgs(range));
@@ -69,12 +65,6 @@ export async function getOrdersByHour(range: DateRangeArgs): Promise<HourlyPoint
     orders: Number(row.orders),
     revenue: Number(row.revenue),
   }));
-}
-
-export interface TrendPoint {
-  day: string;
-  orders: number;
-  revenue: number;
 }
 
 export async function getRevenueTrend(range: DateRangeArgs): Promise<TrendPoint[]> {
@@ -89,12 +79,6 @@ export async function getRevenueTrend(range: DateRangeArgs): Promise<TrendPoint[
   }));
 }
 
-export interface CategoryPerformance {
-  category_name: string;
-  quantity: number;
-  revenue: number;
-}
-
 export async function getOrdersByCategory(range: DateRangeArgs): Promise<CategoryPerformance[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("analytics_orders_by_category", toArgs(range));
@@ -105,12 +89,6 @@ export async function getOrdersByCategory(range: DateRangeArgs): Promise<Categor
     quantity: Number(row.quantity),
     revenue: Number(row.revenue),
   }));
-}
-
-export interface ItemPerformance {
-  item_name: string;
-  quantity: number;
-  revenue: number;
 }
 
 export async function getTopItems(range: DateRangeArgs, limit = 10): Promise<ItemPerformance[]> {
@@ -128,11 +106,6 @@ export async function getTopItems(range: DateRangeArgs, limit = 10): Promise<Ite
   }));
 }
 
-export interface StatusSlice {
-  status: OrderStatus;
-  orders: number;
-}
-
 export async function getStatusDistribution(range: DateRangeArgs): Promise<StatusSlice[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("analytics_status_distribution", toArgs(range));
@@ -142,12 +115,6 @@ export async function getStatusDistribution(range: DateRangeArgs): Promise<Statu
     status: row.status as OrderStatus,
     orders: Number(row.orders),
   }));
-}
-
-export interface TypeSlice {
-  order_type: OrderType;
-  orders: number;
-  revenue: number;
 }
 
 export async function getOrderTypeSplit(range: DateRangeArgs): Promise<TypeSlice[]> {
@@ -168,13 +135,12 @@ export async function getOrderTypeSplit(range: DateRangeArgs): Promise<TypeSlice
 
 export type RangePreset = "today" | "yesterday" | "7d" | "30d" | "90d" | "custom";
 
-export const RANGE_PRESET_LABELS: Record<Exclude<RangePreset, "custom">, string> = {
-  today: "Today",
-  yesterday: "Yesterday",
-  "7d": "Last 7 days",
-  "30d": "Last 30 days",
-  "90d": "Last 90 days",
-};
+export {
+  RANGE_PRESET_LABELS,
+  REPORT_RANGE_PRESETS,
+  parseRangePreset,
+  type ReportRangePreset,
+} from "@/lib/reports/range";
 
 /**
  * Resolves a preset into a half-open [from, to) interval anchored to the

@@ -28,7 +28,7 @@ export default async function CartPage() {
       };
 
   return (
-    <div className="page-wrap py-10">
+    <div className="page-wrap py-8 sm:py-10">
       <SectionHeading eyebrow="Your order" title="Cart" />
       <div className="mt-10">
         <CartView settings={settings as Awaited<ReturnType<typeof getRestaurantSettings>>} />

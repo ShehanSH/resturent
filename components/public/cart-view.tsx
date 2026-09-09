@@ -81,7 +81,7 @@ export function CartView({ settings }: { settings: RestaurantSettingsRow }) {
           </li>
         ))}
       </ul>
-      <aside className="brand-card h-fit space-y-4 p-6">
+      <aside className="brand-card h-fit space-y-4 p-5 sm:p-6">
         <h2 className="font-heading text-sm tracking-[0.14em] text-primary uppercase">Order summary</h2>
         <p className="flex justify-between text-sm">
           <span className="text-muted-foreground">Subtotal</span>

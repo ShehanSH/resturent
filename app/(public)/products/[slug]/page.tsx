@@ -89,14 +89,14 @@ export default async function ProductPage({
       </Link>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-[color-mix(in_oklch,var(--cream),var(--primary)_8%)] shadow-[0_8px_30px_-12px_rgba(90,18,28,0.15)]">
+        <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-[color-mix(in_oklch,var(--cream),var(--primary)_8%)] shadow-[0_8px_30px_-12px_rgba(90,18,28,0.15)] lg:aspect-square">
           <FoodImage src={item.image_url} alt={item.name} sizes="(max-width: 1024px) 100vw, 50vw" />
         </div>
         <div>
           {item.category ? (
             <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">{item.category.name}</p>
           ) : null}
-          <h1 className="font-heading mt-1 text-4xl tracking-wide text-primary uppercase">{item.name}</h1>
+          <h1 className="font-heading mt-1 text-3xl tracking-wide text-primary uppercase sm:text-4xl">{item.name}</h1>
           <div className="mt-4 text-2xl">
             <Price price={Number(item.price)} discountPrice={item.discount_price} settings={settings} />
           </div>

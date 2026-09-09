@@ -113,7 +113,7 @@ export function PublicFooter({
         </div>
       </div>
 
-      <div className="relative border-t border-white/15">
+      <div className="relative border-t border-white/15 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
         <p className="page-wrap py-5 text-center text-xs tracking-wide text-white/70">
           © {new Date().getFullYear()} {settings.restaurant_name}. All Rights Reserved.
         </p>

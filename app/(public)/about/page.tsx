@@ -23,7 +23,7 @@ export default async function AboutPage() {
   const name = settings?.restaurant_name ?? "Hot Bread Beruwala";
 
   return (
-    <div className="py-16">
+    <div className="py-10 sm:py-16">
       <div className="page-wrap max-w-3xl">
         <SectionHeading eyebrow="Our story" title={`About ${name}`} />
         <p className="mx-auto mt-10 max-w-2xl text-center text-lg leading-relaxed text-foreground/75">
@@ -52,8 +52,8 @@ export default async function AboutPage() {
         ))}
       </div>
 
-      <div className="page-wrap mt-14 text-center">
-        <Link href="/menu" className="btn-order">
+      <div className="page-wrap mt-10 flex justify-center sm:mt-14">
+        <Link href="/menu" className="btn-order w-full max-w-xs sm:w-auto">
           Order now
         </Link>
       </div>

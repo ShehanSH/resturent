@@ -34,9 +34,37 @@ export const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
   READY: "bg-emerald-100 text-emerald-900 border-emerald-200",
   OUT_FOR_DELIVERY: "bg-cyan-100 text-cyan-900 border-cyan-200",
   DELIVERED: "bg-neutral-100 text-neutral-700 border-neutral-200",
-  PICKED_UP: "bg-neutral-100 text-neutral-700 border-neutral-200",
+  PICKED_UP: "bg-teal-100 text-teal-900 border-teal-200",
   CANCELLED: "bg-rose-100 text-rose-900 border-rose-200",
 };
+
+/** Distinct fills for dashboard/report charts. Labels still carry the status name. */
+export const ORDER_STATUS_CHART_COLORS: Record<OrderStatus, string> = {
+  PENDING: "#d97706",
+  CONFIRMED: "#2563eb",
+  PREPARING: "#4f46e5",
+  READY: "#059669",
+  OUT_FOR_DELIVERY: "#0891b2",
+  DELIVERED: "#57534e",
+  PICKED_UP: "#0f766e",
+  CANCELLED: "#e11d48",
+};
+
+export const ORDER_TYPE_CHART_COLORS: Record<OrderType, string> = {
+  PICKUP: "#7a1520",
+  DELIVERY: "#1d6b8a",
+};
+
+export const MENU_CHART_COLORS = [
+  "#7a1520",
+  "#c4a35a",
+  "#1d6b8a",
+  "#0f766e",
+  "#b45309",
+  "#6d28d9",
+  "#9f1239",
+  "#3f6212",
+] as const;
 
 export const ORDER_TYPE_LABELS: Record<OrderType, string> = {
   PICKUP: "Pickup",
