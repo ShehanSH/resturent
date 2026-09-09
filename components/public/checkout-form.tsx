@@ -97,7 +97,11 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
 
   return (
     <form onSubmit={onSubmit} className="grid gap-10 lg:grid-cols-[1fr_22rem]" noValidate>
-      <div className="space-y-8">
+      <fieldset
+        disabled={!accepting}
+        className={cn("min-w-0 space-y-8 border-0 p-0", !accepting && "opacity-60")}
+      >
+        <legend className="sr-only">Checkout details</legend>
         <fieldset className="brand-card space-y-5 p-5 sm:p-6">
           <h2 className="font-heading text-sm tracking-[0.14em] text-primary uppercase">Your details</h2>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -152,7 +156,7 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
                 type="button"
                 onClick={() => setOrderType(type)}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl border-2 px-5 py-4 text-left transition-all",
+                  "flex items-center gap-3 rounded-xl border-2 px-5 py-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50",
                   orderType === type
                     ? "border-primary bg-primary/5 shadow-sm"
                     : "border-transparent bg-black/[0.02] hover:border-primary/20",
@@ -207,7 +211,7 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
             <Textarea id="customer_notes" name="customer_notes" className="rounded-xl" />
           </div>
         </fieldset>
-      </div>
+      </fieldset>
 
       <aside className="brand-card h-fit space-y-4 p-5 sm:p-6 lg:sticky lg:top-24">
         <h2 className="font-heading text-sm tracking-[0.14em] text-primary uppercase">Summary</h2>
@@ -239,8 +243,13 @@ export function CheckoutForm({ settings }: { settings: RestaurantSettingsRow }) 
         </p>
         <FieldError message={fieldMessage(fieldErrors, "items")} />
         <p className="text-xs text-muted-foreground">Pay in cash on pickup or delivery.</p>
-        <Button type="submit" size="lg" className="w-full rounded-xl" disabled={pending || !accepting || items.length === 0}>
-          {pending ? "Placing order…" : "Place order"}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full rounded-xl"
+          disabled={pending || !accepting || items.length === 0}
+        >
+          {pending ? "Placing order…" : accepting ? "Place order" : "Kitchen closed"}
         </Button>
       </aside>
     </form>

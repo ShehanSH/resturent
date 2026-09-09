@@ -63,7 +63,7 @@ export function announcementCopy(settings: RestaurantSettingsRow, isOpen: boolea
     return "Online ordering is paused — you can still browse the menu";
   }
   if (isOpen) return "Freshly prepared every day · Pickup & delivery available";
-  return "Today's kitchen is closed — browse the menu and order when we open";
+  return "Today's kitchen is closed — you can still add dishes to your cart";
 }
 
 export function mapsSearchUrl(address: string): string {

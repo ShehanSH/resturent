@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -136,17 +137,19 @@ export function MenuBrowser({
               <ArrowUpDown className="size-3.5 text-muted-foreground sm:hidden" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-56 p-1.5">
-              <DropdownMenuLabel>Sort dishes</DropdownMenuLabel>
-              {SORT_OPTIONS.map((option) => (
-                <DropdownMenuItem
-                  key={option.value}
-                  onClick={() => updateParams({ sort: option.value === "popular" ? "" : option.value })}
-                  className="cursor-pointer rounded-lg px-2.5 py-2"
-                >
-                  {option.label}
-                  {activeSort === option.value ? <Check className="ml-auto size-4 text-primary" /> : null}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Sort dishes</DropdownMenuLabel>
+                {SORT_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => updateParams({ sort: option.value === "popular" ? "" : option.value })}
+                    className="cursor-pointer rounded-lg px-2.5 py-2"
+                  >
+                    {option.label}
+                    {activeSort === option.value ? <Check className="ml-auto size-4 text-primary" /> : null}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

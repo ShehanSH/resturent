@@ -91,18 +91,24 @@ export default async function HomePage() {
               {settings.description ||
                 "Freshly prepared with quality ingredients. Made with care. Served with pride."}
             </p>
-            <div className="mt-8 flex w-full max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap">
-              <Link href="/menu" className="btn-order w-full sm:w-auto">
-                <ShoppingBag className="size-4" />
+            <div className="mt-8 grid w-full grid-cols-2 gap-2.5 sm:flex sm:w-auto sm:flex-row sm:flex-wrap sm:gap-3">
+              <Link
+                href="/menu"
+                className="btn-order h-11 min-w-0 px-3 text-[11px] tracking-[0.12em] sm:h-12 sm:min-w-44 sm:px-7 sm:text-sm"
+              >
+                <ShoppingBag className="size-3.5 sm:size-4" />
                 Order now
               </Link>
-              <Link href="/menu" className="btn-order-light w-full sm:w-auto">
+              <Link
+                href="/menu"
+                className="btn-order-light h-11 min-w-0 px-3 text-[11px] tracking-[0.12em] sm:h-12 sm:min-w-44 sm:px-7 sm:text-sm"
+              >
                 View menu
               </Link>
             </div>
             {!accepting ? (
               <p className="mt-6 max-w-md rounded-xl border border-amber-300/30 bg-black/40 px-4 py-3 text-sm text-amber-100 backdrop-blur-sm">
-                Online ordering is paused right now. You can still browse the menu.
+                Online ordering is paused right now. You can still add dishes to your cart.
               </p>
             ) : null}
           </div>
@@ -144,7 +150,7 @@ export default async function HomePage() {
 
       {/* ── WE DELIVER bar above footer ── */}
       <section className="relative overflow-hidden bg-[#3a080c] text-white">
-        <div className="relative min-h-[18rem] w-full sm:min-h-0 sm:aspect-[1772/380]">
+        <div className="relative min-h-[20rem] w-full lg:min-h-0 lg:aspect-[1772/380]">
           <Image
             src={BRAND_DELIVERY_SRC}
             alt="Hot curry and paratha ready for delivery"
@@ -152,10 +158,10 @@ export default async function HomePage() {
             sizes="100vw"
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/35 to-black/20 sm:from-black/50 sm:via-black/15 sm:to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/40 to-black/20 lg:from-black/50 lg:via-black/15 lg:to-transparent" />
           <div className="absolute inset-0 flex items-center">
-            <div className="page-wrap relative flex w-full flex-col items-start justify-center gap-5 py-8 sm:flex-row sm:items-center sm:py-0">
-              <div className="min-w-0 max-w-lg sm:max-w-[46%] sm:pl-4 lg:pl-8">
+            <div className="page-wrap grid w-full items-center gap-5 py-10 lg:grid-cols-[minmax(0,1.2fr)_auto_minmax(0,1fr)] lg:gap-8 lg:py-0">
+              <div className="min-w-0 lg:pl-4 xl:pl-8">
                 <p className="font-script text-xl text-gold sm:text-2xl lg:text-3xl">
                   Craving something delicious?
                 </p>
@@ -168,11 +174,12 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/menu"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border-2 border-white/90 bg-black/30 px-6 text-sm font-semibold tracking-[0.14em] text-white uppercase backdrop-blur-[2px] transition hover:bg-white hover:text-[#3a080c] sm:absolute sm:left-1/2 sm:top-1/2 sm:h-12 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:px-7"
+                className="inline-flex h-12 w-fit shrink-0 items-center justify-center gap-2 rounded-full border-2 border-white/90 bg-black/35 px-6 text-sm font-semibold tracking-[0.14em] text-white uppercase backdrop-blur-[2px] transition hover:bg-white hover:text-[#3a080c] lg:px-7"
               >
                 <Bike className="size-4" />
                 Order now
               </Link>
+              <div className="hidden lg:block" aria-hidden />
             </div>
           </div>
         </div>

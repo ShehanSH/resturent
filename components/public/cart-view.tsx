@@ -7,10 +7,17 @@ import { EmptyState } from "@/components/empty-state";
 import { FoodImage } from "@/components/public/food-image";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
-import { formatMoney } from "@/lib/format";
-import type { RestaurantSettingsRow } from "@/types/database";
+import { formatMoney, type CurrencyConfig } from "@/lib/format";
 
-export function CartView({ settings }: { settings: RestaurantSettingsRow }) {
+export function CartView({
+  settings,
+  accepting = true,
+  closedMessage,
+}: {
+  settings: CurrencyConfig;
+  accepting?: boolean;
+  closedMessage?: string | null;
+}) {
   const { items, subtotal, updateQuantity, removeItem } = useCart();
 
   if (items.length === 0) {
@@ -90,9 +97,21 @@ export function CartView({ settings }: { settings: RestaurantSettingsRow }) {
         <p className="text-xs text-muted-foreground">
           Delivery fee is calculated at checkout. Final prices are confirmed on the server.
         </p>
-        <Link href="/checkout" className="btn-order mt-2 w-full">
-          Go to checkout
-        </Link>
+        {accepting ? (
+          <Link href="/checkout" className="btn-order mt-2 w-full">
+            Go to checkout
+          </Link>
+        ) : (
+          <>
+            <p className="rounded-xl border border-amber-200/80 bg-amber-50 px-3 py-2.5 text-xs leading-relaxed text-amber-950">
+              {closedMessage || "The kitchen is closed."} Keep these dishes in your cart and check out when we
+              open.
+            </p>
+            <button type="button" className="btn-order mt-2 w-full" disabled>
+              Checkout unavailable
+            </button>
+          </>
+        )}
       </aside>
     </div>
   );
