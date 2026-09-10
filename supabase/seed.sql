@@ -51,7 +51,7 @@ join (values
   ('Portion size', 'Large', 350.00, 2, false),
   ('Portion size', 'Family (serves 3)', 850.00, 3, false),
   ('Spice level', 'Mild', 0.00, 1, true),
-  ('Spice level', 'Medium', 0.00, 2, false),
+  ('Spice level', 'Medium spice', 0.00, 2, false),
   ('Spice level', 'Sri Lankan hot', 0.00, 3, false),
   ('Extra toppings', 'Extra cheese', 200.00, 1, false),
   ('Extra toppings', 'Fried egg', 150.00, 2, false),
