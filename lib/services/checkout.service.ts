@@ -133,11 +133,62 @@ export async function cancelGuestOrder(token: string, reason?: string | null): P
   }
 
   const admin = createSupabaseAdminClient();
-  const { data, error } = await admin.rpc("cancel_order_by_token", {
-    p_token: token,
-    p_reason: reason?.trim() || "Cancelled by customer",
-  });
+  const { data: existing, error: findError } = await admin
+    .from("orders")
+    .select("*")
+    .eq("tracking_token", token)
+    .maybeSingle();
 
-  if (error) throw error;
-  return data as unknown as OrderRow;
+  if (findError) throw findError;
+  if (!existing) {
+    throw new AppError("We could not find that order.", "R0009");
+  }
+
+  const order = existing as OrderRow;
+  if (order.status === "CANCELLED") return order;
+
+  if (order.status !== "PENDING") {
+    throw new AppError(
+      "This order has already been confirmed. Please call the restaurant to cancel.",
+      "R0010",
+    );
+  }
+
+  const reasonText = reason?.trim() || "Cancelled by customer";
+  const now = new Date().toISOString();
+
+  const { data: updated, error: updateError } = await admin
+    .from("orders")
+    .update({
+      status: "CANCELLED",
+      cancelled_at: now,
+      cancellation_reason: reasonText,
+    })
+    .eq("id", order.id)
+    .eq("status", "PENDING")
+    .select("*")
+    .maybeSingle();
+
+  if (updateError) throw updateError;
+  if (!updated) {
+    throw new AppError(
+      "This order has already been confirmed. Please call the restaurant to cancel.",
+      "R0010",
+    );
+  }
+
+  const cancelled = updated as OrderRow;
+  const { error: historyError } = await admin.from("order_status_history").insert({
+    order_id: cancelled.id,
+    old_status: "PENDING",
+    new_status: "CANCELLED",
+    changed_by: null,
+    notes: "Cancelled by customer",
+  });
+  if (historyError) {
+    logger.error("order.guest_cancel_history_failed", { message: historyError.message });
+  }
+
+  logger.info("order.cancelled_by_guest", { order_number: cancelled.order_number });
+  return cancelled;
 }

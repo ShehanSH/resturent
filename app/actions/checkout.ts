@@ -114,6 +114,13 @@ export async function cancelGuestOrderAction(input: unknown): Promise<ActionResu
     revalidatePath("/cashier/orders");
     return actionSuccess({ status: order.status });
   } catch (error) {
+    logger.error("order.guest_cancel_failed", {
+      message: error instanceof Error ? error.message : String(error),
+      code:
+        typeof error === "object" && error !== null && "code" in error
+          ? String((error as { code?: unknown }).code)
+          : undefined,
+    });
     return actionFailure(toUserMessage(error, "We could not cancel this order. Please call us."));
   }
 }

@@ -43,8 +43,8 @@ export default async function ConfirmationPage({
         <p className="text-muted-foreground mt-2 text-sm capitalize">{type.toLowerCase()}</p>
       ) : null}
       <p className="text-muted-foreground mx-auto mt-5 max-w-md leading-relaxed">
-        Pay in cash when you collect or when the rider arrives. We&apos;ll send SMS updates if SMS is configured.
-        You can cancel from the tracking page until the kitchen confirms the order.
+        Pay in cash or card when you collect or when the rider arrives. We&apos;ll send SMS updates to your
+        phone. You can cancel from Track order until the kitchen confirms.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         {token ? (
