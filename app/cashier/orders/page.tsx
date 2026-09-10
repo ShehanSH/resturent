@@ -25,15 +25,3 @@ export default async function CashierOrdersPage() {
     </div>
   );
 }
-
-  return (
-    <div>
-      <AdminPageHeader
-        eyebrow="Counter"
-        title="Pickup queue"
-        description="Large controls for a tablet. New orders appear without refresh."
-      />
-      <OrderBoard initialOrders={orders} role="CASHIER" settings={settings} />
-    </div>
-  );
-}
