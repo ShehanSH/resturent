@@ -6,6 +6,7 @@ import {
   BarChart3,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   MessageSquare,
   Settings,
   ShoppingBag,
@@ -20,11 +21,18 @@ import { BrandLogo } from "@/components/public/brand-logo";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/database";
 
+function isStaffLinkActive(pathname: string, href: string) {
+  if (href === "/admin") return pathname === "/admin" || pathname === "/admin/dashboard";
+  if (href === "/admin/sms") return pathname === "/admin/sms";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 const NAV: Record<UserRole, { href: string; label: string; icon: typeof LayoutDashboard }[]> = {
   ADMIN: [
-    { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
     { href: "/admin/sms", label: "SMS log", icon: MessageSquare },
+    { href: "/admin/sms/campaign", label: "Offers SMS", icon: Megaphone },
     { href: "/admin/categories", label: "Categories", icon: Tag },
     { href: "/admin/products", label: "Food items", icon: UtensilsCrossed },
     { href: "/admin/options", label: "Item options", icon: SlidersHorizontal },
@@ -63,7 +71,7 @@ export function StaffShell({
         </div>
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 py-3" aria-label="Staff">
           {links.map((link) => {
-            const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+            const active = isStaffLinkActive(pathname, link.href);
             return (
               <Link
                 key={link.href}
@@ -107,7 +115,7 @@ export function StaffShell({
           <div className="flex min-w-0 items-center gap-2 md:hidden">
             <nav className="flex max-w-[70vw] gap-1 overflow-x-auto" aria-label="Staff mobile">
               {links.map((link) => {
-                const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                const active = isStaffLinkActive(pathname, link.href);
                 return (
                   <Link
                     key={link.href}

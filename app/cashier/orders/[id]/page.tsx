@@ -22,7 +22,7 @@ const STATUS_VARIANT: Record<OrderStatus, "success" | "warning" | "danger" | "in
 };
 
 const PAYMENT_VARIANT: Record<PaymentStatus, "success" | "warning" | "danger" | "neutral"> = {
-  PENDING: "warning",
+  PENDING: "danger",
   COLLECTED: "success",
   FAILED: "danger",
   REFUNDED: "neutral",
@@ -49,7 +49,9 @@ export default async function CashierOrderDetailPage({ params }: { params: Promi
       />
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <StatusBadge variant={STATUS_VARIANT[order.status]}>{ORDER_STATUS_LABELS[order.status]}</StatusBadge>
-        <StatusBadge variant={PAYMENT_VARIANT[order.payment_status]}>{PAYMENT_LABEL[order.payment_status]}</StatusBadge>
+        {order.status !== "CANCELLED" ? (
+          <StatusBadge variant={PAYMENT_VARIANT[order.payment_status]}>{PAYMENT_LABEL[order.payment_status]}</StatusBadge>
+        ) : null}
       </div>
       <div className="mb-4 max-w-xl">
         <OrderActions

@@ -9,19 +9,19 @@ import { adminProductsHref } from "@/lib/admin-paths";
 
 export function ProductFilters({
   search,
-  categoryId,
+  categorySlug,
   categories,
 }: {
   search?: string;
-  categoryId?: string;
-  categories: { id: string; name: string }[];
+  categorySlug?: string;
+  categories: { id: string; name: string; slug: string }[];
 }) {
   const router = useRouter();
 
   function navigate(next: { q?: string; category?: string }) {
     const href = adminProductsHref({
       q: next.q !== undefined ? next.q : search,
-      category: next.category !== undefined ? next.category : categoryId,
+      category: next.category !== undefined ? next.category : categorySlug,
     });
     const current = `${window.location.pathname}${window.location.search}`;
     if (current === href) return;
@@ -39,13 +39,13 @@ export function ProductFilters({
       <AdminSelect
         id="category-filter"
         aria-label="Filter by category"
-        value={categoryId || "all"}
+        value={categorySlug || "all"}
         className="sm:max-w-64"
         icon={<Filter className="size-4 text-muted-foreground" aria-hidden />}
         onValueChange={(value) => navigate({ category: value })}
         options={[
           { value: "all", label: "All categories" },
-          ...categories.map((category) => ({ value: category.id, label: category.name })),
+          ...categories.map((category) => ({ value: category.slug, label: category.name })),
         ]}
       />
     </div>

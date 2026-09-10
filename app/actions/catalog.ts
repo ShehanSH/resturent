@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/auth/session";
-import { actionFailure, actionSuccess, toUserMessage, type ActionResult } from "@/lib/errors";
+import { actionFailure, actionSuccess, toUserMessage, type ActionResult, AppError } from "@/lib/errors";
 import { recordAudit } from "@/lib/services/audit.service";
+import { checkRateLimit } from "@/lib/services/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fieldErrorsFrom, uuidSchema } from "@/lib/validations/common";
 import {
@@ -25,12 +26,29 @@ import {
 import { getRestaurantSettings } from "@/lib/services/settings.service";
 import { slugify } from "@/lib/format";
 
-function revalidateMenu() {
+function revalidateMenu(extra: { categorySlug?: string | null; productSlug?: string | null } = {}) {
   revalidatePath("/");
   revalidatePath("/menu");
   revalidatePath("/admin/categories");
   revalidatePath("/admin/products");
   revalidatePath("/admin/options");
+  if (extra.categorySlug) revalidatePath(`/menu/${extra.categorySlug}`);
+  if (extra.productSlug) revalidatePath(`/products/${extra.productSlug}`);
+}
+
+async function requireAdminWrite() {
+  const profile = await requireRole(["ADMIN"]);
+  const limit = await checkRateLimit("admin.catalog", profile.id, 120, 3600);
+  if (!limit.allowed) {
+    throw new AppError("Too many menu changes in a short time. Please wait a minute and try again.");
+  }
+  return profile;
+}
+
+function requireExistingId(id: string): string {
+  const parsed = uuidSchema.safeParse(id);
+  if (!parsed.success) throw new AppError("This record could not be found.");
+  return parsed.data;
 }
 
 export async function upsertCategoryAction(
@@ -43,7 +61,7 @@ export async function upsertCategoryAction(
   }
 
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
     const settings = await getRestaurantSettings();
     const supabase = await createSupabaseServerClient();
 
@@ -67,16 +85,17 @@ export async function upsertCategoryAction(
     };
 
     if (id) {
-      const { error } = await supabase.from("categories").update(payload).eq("id", id);
+      const existingId = requireExistingId(id);
+      const { error } = await supabase.from("categories").update(payload).eq("id", existingId);
       if (error) throw error;
       await recordAudit({
         profileId: profile.id,
         action: "category.updated",
         entity: "categories",
-        entityId: id,
+        entityId: existingId,
       });
-      revalidateMenu();
-      return actionSuccess({ id });
+      revalidateMenu({ categorySlug: payload.slug });
+      return actionSuccess({ id: existingId });
     }
 
     const { data, error } = await supabase.from("categories").insert(payload).select("id").single();
@@ -87,7 +106,7 @@ export async function upsertCategoryAction(
       entity: "categories",
       entityId: data.id,
     });
-    revalidateMenu();
+    revalidateMenu({ categorySlug: payload.slug });
     return actionSuccess({ id: data.id });
   } catch (error) {
     return actionFailure(toUserMessage(error, "Could not save this category."));
@@ -99,18 +118,19 @@ export async function setCategoryActiveAction(
   isActive: boolean,
 ): Promise<ActionResult<{ id: string }>> {
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
+    const existingId = requireExistingId(id);
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.from("categories").update({ is_active: isActive }).eq("id", id);
+    const { error } = await supabase.from("categories").update({ is_active: isActive }).eq("id", existingId);
     if (error) throw error;
     await recordAudit({
       profileId: profile.id,
       action: isActive ? "category.updated" : "category.deactivated",
       entity: "categories",
-      entityId: id,
+      entityId: existingId,
     });
     revalidateMenu();
-    return actionSuccess({ id });
+    return actionSuccess({ id: existingId });
   } catch (error) {
     return actionFailure(toUserMessage(error, "Could not update this category."));
   }
@@ -121,7 +141,7 @@ export async function deleteCategoryAction(id: string): Promise<ActionResult<{ i
   if (!parsed.success) return actionFailure("This category could not be found.");
 
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
     const supabase = await createSupabaseServerClient();
 
     const { data: dishes, error: dishesError } = await supabase
@@ -164,19 +184,21 @@ export async function upsertFoodItemAction(
   }
 
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
     const settings = await getRestaurantSettings();
     const supabase = await createSupabaseServerClient();
     const { option_group_ids, ...rest } = parsed.data;
 
     let categoryName: string | null = null;
+    let categorySlug: string | null = null;
     if (rest.category_id) {
       const { data: category } = await supabase
         .from("categories")
-        .select("name")
+        .select("name, slug")
         .eq("id", rest.category_id)
         .maybeSingle();
       categoryName = category?.name ?? null;
+      categorySlug = category?.slug ?? null;
     }
 
     const location = seoPlaceName(settings.restaurant_name, settings.address);
@@ -200,10 +222,10 @@ export async function upsertFoodItemAction(
       ]),
     };
 
-    let foodId = id;
-    if (id) {
-      const { data: previous } = await supabase.from("food_items").select("price").eq("id", id).maybeSingle();
-      const { error } = await supabase.from("food_items").update(payload).eq("id", id);
+    let foodId = id ? requireExistingId(id) : null;
+    if (foodId) {
+      const { data: previous } = await supabase.from("food_items").select("price").eq("id", foodId).maybeSingle();
+      const { error } = await supabase.from("food_items").update(payload).eq("id", foodId);
       if (error) throw error;
       await recordAudit({
         profileId: profile.id,
@@ -212,7 +234,7 @@ export async function upsertFoodItemAction(
             ? "food_item.price_changed"
             : "food_item.updated",
         entity: "food_items",
-        entityId: id,
+        entityId: foodId,
         metadata: { price: payload.price },
       });
     } else {
@@ -241,7 +263,7 @@ export async function upsertFoodItemAction(
       if (error) throw error;
     }
 
-    revalidateMenu();
+    revalidateMenu({ productSlug: payload.slug, categorySlug });
     return actionSuccess({ id: foodId });
   } catch (error) {
     return actionFailure(toUserMessage(error, "Could not save this dish."));
@@ -253,19 +275,20 @@ export async function setFoodAvailabilityAction(
   isAvailable: boolean,
 ): Promise<ActionResult<{ id: string }>> {
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
+    const existingId = requireExistingId(id);
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.from("food_items").update({ is_available: isAvailable }).eq("id", id);
+    const { error } = await supabase.from("food_items").update({ is_available: isAvailable }).eq("id", existingId);
     if (error) throw error;
     await recordAudit({
       profileId: profile.id,
       action: "food_item.availability_changed",
       entity: "food_items",
-      entityId: id,
+      entityId: existingId,
       metadata: { is_available: isAvailable },
     });
     revalidateMenu();
-    return actionSuccess({ id });
+    return actionSuccess({ id: existingId });
   } catch (error) {
     return actionFailure(toUserMessage(error, "Could not update availability."));
   }
@@ -276,7 +299,7 @@ export async function deleteFoodItemAction(id: string): Promise<ActionResult<{ i
   if (!parsed.success) return actionFailure("This dish could not be found.");
 
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
     const supabase = await createSupabaseServerClient();
 
     const { count, error: orderError } = await supabase
@@ -319,20 +342,21 @@ export async function upsertOptionGroupAction(
   }
 
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
     const supabase = await createSupabaseServerClient();
 
     if (id) {
-      const { error } = await supabase.from("option_groups").update(parsed.data).eq("id", id);
+      const existingId = requireExistingId(id);
+      const { error } = await supabase.from("option_groups").update(parsed.data).eq("id", existingId);
       if (error) throw error;
       await recordAudit({
         profileId: profile.id,
         action: "option_group.updated",
         entity: "option_groups",
-        entityId: id,
+        entityId: existingId,
       });
       revalidateMenu();
-      return actionSuccess({ id });
+      return actionSuccess({ id: existingId });
     }
 
     const { data, error } = await supabase.from("option_groups").insert(parsed.data).select("id").single();
@@ -360,20 +384,21 @@ export async function upsertOptionAction(
   }
 
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
     const supabase = await createSupabaseServerClient();
 
     if (id) {
-      const { error } = await supabase.from("options").update(parsed.data).eq("id", id);
+      const existingId = requireExistingId(id);
+      const { error } = await supabase.from("options").update(parsed.data).eq("id", existingId);
       if (error) throw error;
       await recordAudit({
         profileId: profile.id,
         action: "option.updated",
         entity: "options",
-        entityId: id,
+        entityId: existingId,
       });
       revalidateMenu();
-      return actionSuccess({ id });
+      return actionSuccess({ id: existingId });
     }
 
     const { data, error } = await supabase.from("options").insert(parsed.data).select("id").single();
@@ -407,11 +432,12 @@ export async function saveOptionGroupWithChoicesAction(
   }
 
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
     const supabase = await createSupabaseServerClient();
     let groupId = id;
 
     if (groupId) {
+      groupId = requireExistingId(groupId);
       const { error } = await supabase.from("option_groups").update(groupParsed.data).eq("id", groupId);
       if (error) throw error;
       await recordAudit({
@@ -476,7 +502,7 @@ export async function deleteOptionGroupAction(id: string): Promise<ActionResult<
   if (!parsed.success) return actionFailure("That option group could not be found.");
 
   try {
-    const profile = await requireRole(["ADMIN"]);
+    const profile = await requireAdminWrite();
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.from("option_groups").delete().eq("id", parsed.data);
     if (error) throw error;

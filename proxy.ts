@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { safeStaffReturnPath } from "@/lib/auth/paths";
+
 /**
  * Proxy (formerly "middleware" before Next.js 16).
  *
@@ -58,7 +60,9 @@ export async function proxy(request: NextRequest) {
   if (isProtected && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
-    loginUrl.searchParams.set("redirectTo", pathname);
+    loginUrl.search = "";
+    const nextPath = safeStaffReturnPath(`${pathname}${request.nextUrl.search}`, "");
+    if (nextPath) loginUrl.searchParams.set("redirectTo", nextPath);
     return NextResponse.redirect(loginUrl);
   }
 

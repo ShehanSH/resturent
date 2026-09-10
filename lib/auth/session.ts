@@ -66,7 +66,7 @@ export async function requireRole(
 export function homePathForRole(role: UserRole): string {
   switch (role) {
     case "ADMIN":
-      return "/admin/dashboard";
+      return "/admin";
     case "CASHIER":
       return "/cashier/orders";
     case "DELIVERY":

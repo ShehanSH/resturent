@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 const VARIANTS = {
   success: "bg-emerald-50 text-emerald-800 ring-emerald-600/15",
   warning: "bg-amber-50 text-amber-800 ring-amber-600/15",
-  danger: "bg-rose-50 text-rose-800 ring-rose-600/15",
+  danger: "bg-rose-100 text-rose-800 ring-rose-500/25",
   info: "bg-sky-50 text-sky-800 ring-sky-600/15",
   brand: "bg-primary/8 text-primary ring-primary/15",
   neutral: "bg-neutral-100 text-neutral-600 ring-neutral-500/10",
@@ -138,17 +138,19 @@ export function RangeTabs({
   basePath,
   value,
   options,
+  param = "range",
 }: {
   basePath: string;
   value: string;
   options: { value: string; label: string }[];
+  param?: string;
 }) {
   return (
     <div className="flex flex-wrap gap-1 rounded-lg border border-border/80 bg-white p-1">
       {options.map((item) => (
         <a
           key={item.value}
-          href={`${basePath}?range=${item.value}`}
+          href={`${basePath}?${param}=${item.value}`}
           className={cn(
             "rounded-md px-3 py-1.5 text-sm font-medium transition",
             value === item.value

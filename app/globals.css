@@ -185,6 +185,10 @@
     @apply inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-destructive/20 bg-white px-3 text-sm font-medium text-destructive transition hover:bg-destructive/8 disabled:pointer-events-none disabled:opacity-50;
   }
 
+  .btn-admin-success {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-200 px-4 text-sm font-medium text-emerald-900 shadow-none transition-all duration-150 hover:bg-emerald-300/80 active:scale-[0.99] focus-visible:ring-3 focus-visible:ring-emerald-400/40 disabled:pointer-events-none disabled:opacity-50;
+  }
+
   .admin-field {
     @apply space-y-1.5;
   }

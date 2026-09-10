@@ -22,7 +22,7 @@ const STATUS_VARIANT: Record<OrderStatus, "success" | "warning" | "danger" | "in
 };
 
 const PAYMENT_VARIANT: Record<PaymentStatus, "success" | "warning" | "danger" | "neutral"> = {
-  PENDING: "warning",
+  PENDING: "danger",
   COLLECTED: "success",
   FAILED: "danger",
   REFUNDED: "neutral",
@@ -90,9 +90,11 @@ export function OrderCard({
 
       <div className="mt-3 flex items-center justify-between gap-2 px-4">
         <p className="text-sm font-semibold">{formatMoney(order.total, settings)}</p>
-        <StatusBadge variant={PAYMENT_VARIANT[order.payment_status]} dot={false}>
-          {PAYMENT_LABEL[order.payment_status]}
-        </StatusBadge>
+        {order.status !== "CANCELLED" ? (
+          <StatusBadge variant={PAYMENT_VARIANT[order.payment_status]} dot={false}>
+            {PAYMENT_LABEL[order.payment_status]}
+          </StatusBadge>
+        ) : null}
       </div>
 
       <div className="mt-auto space-y-2 border-t border-border/70 bg-[#faf8f6] p-3">

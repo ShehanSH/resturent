@@ -22,7 +22,9 @@ const TEMPLATES: Record<SmsEvent, TemplateFn | null> = {
   ORDER_DELIVERED: null,
 
   ORDER_CANCELLED: ({ orderNumber, restaurantName }) =>
-    `${restaurantName}: order #${orderNumber} has been cancelled. Please call us if this is unexpected.`,
+    `${restaurantName}: order #${orderNumber} has been cancelled. Please call us if you have questions.`,
+
+  CAMPAIGN: null,
 };
 
 export function buildMessage(event: SmsEvent, context: OrderSmsContext): string | null {

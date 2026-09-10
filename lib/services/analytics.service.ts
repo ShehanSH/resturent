@@ -1,3 +1,4 @@
+import { startOfRestaurantDay } from "@/lib/timezone";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { OrderStatus, OrderType } from "@/types/database";
 import type {
@@ -152,24 +153,7 @@ export function resolveRange(
   timezone: string,
   custom?: { from?: string; to?: string },
 ): DateRangeArgs {
-  const startOfLocalDay = (offsetDays: number): Date => {
-    const now = new Date();
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: timezone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).formatToParts(now);
-
-    const year = Number(parts.find((p) => p.type === "year")?.value);
-    const month = Number(parts.find((p) => p.type === "month")?.value);
-    const day = Number(parts.find((p) => p.type === "day")?.value);
-
-    const localMidnightUtc = new Date(Date.UTC(year, month - 1, day + offsetDays, 0, 0, 0));
-    // Correct for the zone's offset at that instant.
-    const offsetMinutes = zoneOffsetMinutes(localMidnightUtc, timezone);
-    return new Date(localMidnightUtc.getTime() - offsetMinutes * 60_000);
-  };
+  const startOfLocalDay = (offsetDays: number): Date => startOfRestaurantDay(timezone, offsetDays);
 
   switch (preset) {
     case "today":
@@ -188,32 +172,4 @@ export function resolveRange(
       return { from, to };
     }
   }
-}
-
-/** Minutes that `timezone` is ahead of UTC at the given instant. */
-function zoneOffsetMinutes(instant: Date, timezone: string): number {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    hour12: false,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  const parts = formatter.formatToParts(instant);
-  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? "0");
-
-  const asUtc = Date.UTC(
-    get("year"),
-    get("month") - 1,
-    get("day"),
-    get("hour"),
-    get("minute"),
-    get("second"),
-  );
-
-  return (asUtc - instant.getTime()) / 60_000;
 }

@@ -6,7 +6,7 @@ import { notify } from "@/lib/notify";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 
 import { uploadImageAction } from "@/app/actions/admin";
-import { STORAGE_BUCKETS } from "@/lib/constants";
+import { ACCEPTED_IMAGE_TYPES, MAX_UPLOAD_BYTES, STORAGE_BUCKETS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 type Bucket = (typeof STORAGE_BUCKETS)[keyof typeof STORAGE_BUCKETS];
@@ -32,19 +32,31 @@ export function ImageUploadField({
     event.target.value = "";
     if (!file) return;
 
-    const formData = new FormData();
-    formData.set("file", file);
-    setUploading(true);
-    const result = await uploadImageAction(bucket, formData);
-    setUploading(false);
-
-    if (!result.success) {
-      notify.error(result.error);
+    if (file.size > MAX_UPLOAD_BYTES) {
+      notify.error("Images must be 5 MB or smaller.");
+      return;
+    }
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_IMAGE_TYPES)[number])) {
+      notify.error("Use a JPEG, PNG, WebP or AVIF image.");
       return;
     }
 
-    onChange(result.data.url);
-    notify.success("Image uploaded");
+    const formData = new FormData();
+    formData.set("file", file);
+    setUploading(true);
+    try {
+      const result = await uploadImageAction(bucket, formData);
+      if (!result.success) {
+        notify.error(result.error);
+        return;
+      }
+      onChange(result.data.url);
+      notify.success("Image uploaded");
+    } catch {
+      notify.error("Could not upload this image. Try a smaller file.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (

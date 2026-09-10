@@ -16,7 +16,10 @@ export function FloatingCartBar({
   const pathname = usePathname();
   const { itemCount, subtotal } = useCart();
   const hide =
-    pathname.startsWith("/cart") || pathname.startsWith("/checkout") || pathname.startsWith("/order");
+    pathname.startsWith("/cart") ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/order") ||
+    pathname.startsWith("/products");
   if (hide || itemCount === 0) return null;
 
   return (

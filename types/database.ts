@@ -35,7 +35,8 @@ export type SmsEventType =
   | "ORDER_READY_PICKUP"
   | "ORDER_OUT_FOR_DELIVERY"
   | "ORDER_DELIVERED"
-  | "ORDER_CANCELLED";
+  | "ORDER_CANCELLED"
+  | "CAMPAIGN";
 
 export type SmsStatus = "PENDING" | "SENT" | "FAILED" | "SKIPPED";
 
@@ -466,6 +467,10 @@ export type Database = {
       get_order_tracking: {
         Args: { p_token: string };
         Returns: unknown;
+      };
+      cancel_order_by_token: {
+        Args: { p_token: string; p_reason?: string | null };
+        Returns: OrderRow;
       };
       bootstrap_first_admin: {
         Args: { p_email: string; p_full_name: string };

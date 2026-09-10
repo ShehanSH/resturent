@@ -1,14 +1,18 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { whatsappHref } from "@/lib/brand";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
 
 export function WhatsAppFab({ number }: { number: string | null }) {
+  const pathname = usePathname();
   const { itemCount } = useCart();
   if (!number) return null;
   const href = whatsappHref(number);
   if (!href) return null;
+
+  const onProduct = pathname.startsWith("/products");
 
   return (
     <a
@@ -16,19 +20,18 @@ export function WhatsAppFab({ number }: { number: string | null }) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "fixed right-4 z-50 flex items-center gap-2 rounded-full bg-white py-1.5 pr-1.5 pl-1.5 shadow-[0_10px_28px_-10px_rgba(90,18,28,0.45)] ring-1 ring-black/[0.08] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-12px_rgba(90,18,28,0.5)] md:pr-3.5",
-        itemCount > 0
-          ? "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] md:bottom-6"
-          : "bottom-[max(1.25rem,env(safe-area-inset-bottom))] md:bottom-6",
+        "fixed right-4 z-50 inline-flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_24px_-8px_rgba(18,140,126,0.75)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#20bd5a]",
+        onProduct
+          ? "bottom-[calc(6.25rem+env(safe-area-inset-bottom))] lg:bottom-6"
+          : itemCount > 0
+            ? "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] md:bottom-6"
+            : "bottom-[max(1.25rem,env(safe-area-inset-bottom))] md:bottom-6",
       )}
       aria-label="Chat with us on WhatsApp"
     >
-      <span className="inline-flex size-11 items-center justify-center rounded-full bg-[color-mix(in_oklch,var(--primary),white_88%)] text-primary">
-        <svg viewBox="0 0 24 24" className="size-5 fill-current" aria-hidden>
-          <path d="M20.5 3.5A11 11 0 0 0 2.1 17.1L1 23l6.1-1.1A11 11 0 0 0 12 23a11 11 0 0 0 8.5-19.5ZM12 21a9 9 0 0 1-4.6-1.3l-.3-.2-3.6.7.7-3.5-.2-.3A9 9 0 1 1 12 21Zm5-6.7c-.3-.1-1.6-.8-1.8-.9s-.4-.1-.6.1-.7.9-.8 1-.3.2-.6.1a7.4 7.4 0 0 1-2.2-1.4 8.2 8.2 0 0 1-1.5-1.9c-.2-.3 0-.4.1-.6l.4-.5.1-.2a.5.5 0 0 0 0-.5c0-.1-.6-1.5-.8-2s-.4-.5-.6-.5h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.7 11.5 11.5 0 0 0 4.4 3.9 15 15 0 0 0 1.5.5 3.6 3.6 0 0 0 1.6.1 2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.6-.3Z" />
-        </svg>
-      </span>
-      <span className="hidden pr-1 text-sm font-semibold tracking-wide text-primary md:inline">Chat</span>
+      <svg viewBox="0 0 24 24" className="size-7 fill-current" aria-hidden>
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+      </svg>
     </a>
   );
 }

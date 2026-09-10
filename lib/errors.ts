@@ -29,6 +29,7 @@ const DB_ERROR_MESSAGES: Record<string, string> = {
   R0007: "That change is not allowed for this order.",
   R0008: "You do not have permission to do that.",
   R0009: "We could not find that order.",
+  R0010: "This order has already been confirmed. Please call the restaurant to cancel.",
   "23505": "That record already exists.",
   "23503": "This record is still referenced elsewhere and cannot be removed.",
   "23514": "Some of the values supplied are not valid.",

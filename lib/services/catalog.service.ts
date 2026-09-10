@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { slugify } from "@/lib/format";
+import { isUuid } from "@/lib/validations/common";
 import type {
   CategoryRow,
   FoodItemRow,
@@ -43,12 +45,15 @@ export async function listPublicCategories(): Promise<CategoryRow[]> {
 
 export async function getCategoryBySlug(slug: string): Promise<CategoryRow | null> {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  const { data, error } = await supabase.from("categories").select("*").eq("slug", slug).maybeSingle();
+  if (error) throw error;
+  return data;
+}
 
+export async function getCategoryForAdmin(slugOrId: string): Promise<CategoryRow | null> {
+  const supabase = await createSupabaseServerClient();
+  const column = isUuid(slugOrId) ? "id" : "slug";
+  const { data, error } = await supabase.from("categories").select("*").eq(column, slugOrId).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -269,15 +274,16 @@ export async function listFoodItemsForAdmin(query: AdminFoodItemQuery = {}): Pro
   };
 }
 
-export async function getFoodItemForAdmin(id: string): Promise<
+export async function getFoodItemForAdmin(slugOrId: string): Promise<
   (FoodItemRow & { option_group_ids: string[] }) | null
 > {
   const supabase = await createSupabaseServerClient();
+  const column = isUuid(slugOrId) ? "id" : "slug";
 
   const { data, error } = await supabase
     .from("food_items")
     .select("*, food_item_option_groups(option_group_id)")
-    .eq("id", id)
+    .eq(column, slugOrId)
     .maybeSingle();
 
   if (error) throw error;
@@ -312,7 +318,10 @@ export async function listOptionGroups(): Promise<OptionGroupWithOptions[]> {
   }));
 }
 
-export async function getOptionGroupForAdmin(id: string): Promise<OptionGroupWithOptions | null> {
+export async function getOptionGroupForAdmin(slugOrId: string): Promise<OptionGroupWithOptions | null> {
   const groups = await listOptionGroups();
-  return groups.find((group) => group.id === id) ?? null;
+  if (isUuid(slugOrId)) {
+    return groups.find((group) => group.id === slugOrId) ?? null;
+  }
+  return groups.find((group) => slugify(group.name) === slugOrId) ?? null;
 }

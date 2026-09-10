@@ -126,3 +126,18 @@ export async function getTrackedOrder(token: string, ipAddress?: string): Promis
 
   return (data as unknown as TrackedOrder | null) ?? null;
 }
+
+export async function cancelGuestOrder(token: string, reason?: string | null): Promise<OrderRow> {
+  if (!token || token.length < 32 || token.length > 128) {
+    throw new AppError("We could not find that order.", "R0009");
+  }
+
+  const admin = createSupabaseAdminClient();
+  const { data, error } = await admin.rpc("cancel_order_by_token", {
+    p_token: token,
+    p_reason: reason?.trim() || "Cancelled by customer",
+  });
+
+  if (error) throw error;
+  return data as unknown as OrderRow;
+}

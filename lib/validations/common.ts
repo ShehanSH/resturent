@@ -35,9 +35,14 @@ export const slugSchema = z
   .trim()
   .min(1, "Slug is required")
   .max(120, "Slug is too long")
-  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens only");
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens only")
+  .refine((value) => value !== "new", "Slug cannot be “new”");
 
 export const uuidSchema = z.uuid("Invalid identifier");
+
+export function isUuid(value: string): boolean {
+  return uuidSchema.safeParse(value).success;
+}
 
 export const emailSchema = z.email("Enter a valid email address");
 

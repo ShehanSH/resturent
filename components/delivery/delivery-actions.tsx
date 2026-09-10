@@ -4,6 +4,7 @@ import { useState } from "react";
 import { notify } from "@/lib/notify";
 
 import { collectPaymentAction, updateOrderStatusAction } from "@/app/actions/orders";
+import { canCollectOrderPayment } from "@/lib/orders/transitions";
 import type { OrderStatus, PaymentStatus } from "@/types/database";
 
 export function DeliveryActions({
@@ -41,7 +42,7 @@ export function DeliveryActions({
       ) : null}
       {status === "OUT_FOR_DELIVERY" ? (
         <>
-          {paymentStatus !== "COLLECTED" ? (
+          {canCollectOrderPayment(status, paymentStatus) ? (
             <button type="button" className="btn-admin-outline h-11 w-full" disabled={pending} onClick={() => void collect()}>
               {pending ? "Saving…" : "Payment collected"}
             </button>

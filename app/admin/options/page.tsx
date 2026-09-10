@@ -6,6 +6,7 @@ import { AdminDeleteButton } from "@/components/admin/delete-button";
 import { AdminPageHeader, AdminPrimaryLink } from "@/components/admin/page-header";
 import { StatusBadge } from "@/components/admin/ui";
 import { EmptyState } from "@/components/empty-state";
+import { adminOptionHref } from "@/lib/admin-paths";
 import { formatPriceAdjustment } from "@/lib/format";
 import { listOptionGroups } from "@/lib/services/catalog.service";
 import { getRestaurantSettings } from "@/lib/services/settings.service";
@@ -48,7 +49,7 @@ export default async function AdminOptionsPage() {
                   ) : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Link href={`/admin/options/${group.id}`} className="btn-admin-outline h-9 px-3 text-xs">
+                  <Link href={adminOptionHref(group.name, group.id)} className="btn-admin-outline h-9 px-3 text-xs">
                     <Pencil className="size-3.5" />
                     Edit
                   </Link>

@@ -139,6 +139,7 @@ export async function collectPaymentAction(input: unknown): Promise<ActionResult
 
 function revalidateStaffOrderViews() {
   revalidatePath("/admin/orders");
+  revalidatePath("/admin");
   revalidatePath("/admin/dashboard");
   revalidatePath("/cashier/orders");
   revalidatePath("/delivery/orders");

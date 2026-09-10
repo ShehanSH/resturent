@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { CancelOrderPanel } from "@/components/public/cancel-order-panel";
 import { OrderTimeline } from "@/components/orders/timeline";
 import { isSupabaseConfigured } from "@/lib/env";
 import { formatMoney } from "@/lib/format";
@@ -63,6 +64,12 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
         <span>Total</span>
         <span className="text-primary">{formatMoney(order.total, settings)}</span>
       </p>
+      <CancelOrderPanel
+        token={token}
+        status={order.status as OrderStatus}
+        restaurantPhone={settings.phone}
+        cancellationReason={order.cancellation_reason}
+      />
     </div>
   );
 }

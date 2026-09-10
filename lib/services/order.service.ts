@@ -1,3 +1,4 @@
+import { boardSearchClause } from "@/lib/orders/board-filters";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type {
   OrderItemOptionRow,
@@ -69,12 +70,8 @@ export async function listOrders(query: OrderListQuery = {}): Promise<{
   if (query.to) builder = builder.lt("created_at", query.to);
 
   if (query.search) {
-    const term = query.search.replace(/[(),*]/g, " ").trim();
-    if (term) {
-      builder = builder.or(
-        `order_number.ilike.%${term}%,customer_name.ilike.%${term}%,customer_phone.ilike.%${term}%`,
-      );
-    }
+    const clause = boardSearchClause(query.search);
+    if (clause) builder = builder.or(clause);
   }
 
   const { data, error, count } = await builder
@@ -87,14 +84,24 @@ export async function listOrders(query: OrderListQuery = {}): Promise<{
 }
 
 /** The live queue used by the admin and cashier boards. */
-export async function listActiveOrders(statuses: OrderStatus[]): Promise<OrderWithItems[]> {
+export async function listActiveOrders(
+  statuses: OrderStatus[],
+  filters?: { from?: Date; to?: Date; search?: string },
+): Promise<OrderWithItems[]> {
   const supabase = await createSupabaseServerClient();
 
-  const { data, error } = await supabase
-    .from("orders")
-    .select(ORDER_WITH_ITEMS_SELECT)
-    .in("status", statuses)
-    .order("created_at", { ascending: true });
+  let builder = supabase.from("orders").select(ORDER_WITH_ITEMS_SELECT).in("status", statuses);
+
+  if (filters?.from) builder = builder.gte("created_at", filters.from.toISOString());
+  if (filters?.to) builder = builder.lt("created_at", filters.to.toISOString());
+  if (filters?.search) {
+    const clause = boardSearchClause(filters.search);
+    if (clause) builder = builder.or(clause);
+  }
+
+  const { data, error } = await builder
+    .order("created_at", { ascending: Boolean(filters?.from || filters?.to) })
+    .limit(400);
 
   if (error) throw error;
   return (data ?? []) as unknown as OrderWithItems[];

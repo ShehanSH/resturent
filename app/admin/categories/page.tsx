@@ -7,6 +7,7 @@ import { AdminDeleteButton } from "@/components/admin/delete-button";
 import { AdminPageHeader, AdminPrimaryLink } from "@/components/admin/page-header";
 import { DataTable, StatusBadge } from "@/components/admin/ui";
 import { EmptyState } from "@/components/empty-state";
+import { adminCategoryHref } from "@/lib/admin-paths";
 import { listCategoriesForAdmin } from "@/lib/services/catalog.service";
 
 export default async function AdminCategoriesPage() {
@@ -62,7 +63,7 @@ export default async function AdminCategoriesPage() {
                   <td>{category.food_count}</td>
                   <td>
                     <div className="flex flex-wrap items-center gap-2">
-                      <Link href={`/admin/categories/${category.id}`} className="btn-admin-outline h-9 px-3 text-xs">
+                      <Link href={adminCategoryHref(category.slug)} className="btn-admin-outline h-9 px-3 text-xs">
                         <Pencil className="size-3.5" />
                         Edit
                       </Link>

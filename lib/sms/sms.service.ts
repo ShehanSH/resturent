@@ -147,6 +147,59 @@ export async function notifyOrderEvent(params: NotifyParams): Promise<void> {
   }
 }
 
+export async function sendCampaignMessage(params: {
+  phoneNumber: string;
+  message: string;
+}): Promise<SmsStatus> {
+  const admin = createSupabaseAdminClient();
+  const provider = getSmsProvider();
+  const env = serverEnv();
+  const recipient = normalisePhone(params.phoneNumber, env.SMS_DEFAULT_COUNTRY_CODE);
+
+  let status: SmsStatus = "PENDING";
+  let providerMessageId: string | null = null;
+  let errorMessage: string | null = null;
+
+  try {
+    const result = await provider.send({ phoneNumber: recipient, message: params.message });
+    if (result.success) {
+      status = "SENT";
+      providerMessageId = result.providerMessageId ?? null;
+    } else if (provider.name === "disabled") {
+      status = "SKIPPED";
+      errorMessage = result.errorMessage ?? null;
+    } else {
+      status = "FAILED";
+      errorMessage = result.errorMessage ?? "Unknown error";
+      logger.warn("sms.campaign_failed", { provider: provider.name });
+    }
+  } catch (error) {
+    status = "FAILED";
+    errorMessage = error instanceof Error ? error.message : "Unexpected SMS error";
+    logger.error("sms.campaign_threw", { message: errorMessage });
+  }
+
+  try {
+    await admin.from("sms_logs").insert({
+      order_id: null,
+      phone_number: recipient,
+      event_type: "CAMPAIGN",
+      message: params.message,
+      provider: provider.name,
+      status,
+      provider_message_id: providerMessageId,
+      error_message: errorMessage,
+      sent_at: status === "SENT" ? new Date().toISOString() : null,
+    });
+  } catch (error) {
+    logger.error("sms.campaign_log_failed", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  return status;
+}
+
 /** Re-sends a previously failed notification. Returns whether it succeeded. */
 export async function retrySmsLog(logId: string): Promise<boolean> {
   const admin = createSupabaseAdminClient();
@@ -178,7 +231,7 @@ export type SmsLogListItem = SmsLogRow & {
   orders: { order_number: string } | null;
 };
 
-export async function listRecentSmsLogs(limit = 50): Promise<SmsLogListItem[]> {
+export async function listRecentSmsLogs(limit = 200): Promise<SmsLogListItem[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("sms_logs")

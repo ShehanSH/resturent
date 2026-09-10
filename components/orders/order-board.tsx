@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { OrderCard } from "@/components/orders/order-card";
+import { orderMatchesBoardWindow, orderMatchesSearch } from "@/lib/orders/board-filters";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { ORDER_STATUS_LABELS } from "@/lib/constants";
 import type { OrderWithItems } from "@/lib/services/order.service";
 import type { OrderStatus, RestaurantSettingsRow, UserRole } from "@/types/database";
 
@@ -15,6 +15,7 @@ const COLUMNS: { id: string; statuses: OrderStatus[] }[] = [
   { id: "READY", statuses: ["READY"] },
   { id: "OUT", statuses: ["OUT_FOR_DELIVERY"] },
   { id: "DONE", statuses: ["DELIVERED", "PICKED_UP"] },
+  { id: "CANCELLED", statuses: ["CANCELLED"] },
 ];
 
 const COLUMN_LABELS: Record<string, string> = {
@@ -23,20 +24,28 @@ const COLUMN_LABELS: Record<string, string> = {
   READY: "Ready",
   OUT: "Out for delivery",
   DONE: "Completed",
+  CANCELLED: "Cancelled",
 };
 
 export function OrderBoard({
   initialOrders,
   role,
   settings,
+  filter,
 }: {
   initialOrders: OrderWithItems[];
   role: UserRole;
   settings: RestaurantSettingsRow;
+  filter?: { from?: string; to?: string; search?: string };
 }) {
   const [orders, setOrders] = useState(initialOrders);
   const seen = useRef(new Set(initialOrders.map((order) => order.id)));
   const audioReady = useRef(false);
+
+  useEffect(() => {
+    setOrders(initialOrders);
+    seen.current = new Set(initialOrders.map((order) => order.id));
+  }, [initialOrders]);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -48,21 +57,39 @@ export function OrderBoard({
         (payload) => {
           const row = payload.new as OrderWithItems | undefined;
           if (!row?.id) return;
+          const range = {
+            from: filter?.from ? new Date(filter.from) : undefined,
+            to: filter?.to ? new Date(filter.to) : undefined,
+          };
+          const visible =
+            Boolean(row.created_at) &&
+            orderMatchesBoardWindow(row.created_at, range) &&
+            orderMatchesSearch(
+              {
+                order_number: row.order_number ?? "",
+                customer_name: row.customer_name ?? "",
+                customer_phone: row.customer_phone ?? "",
+              },
+              filter?.search,
+            );
           if (payload.eventType === "INSERT" && !seen.current.has(row.id)) {
             seen.current.add(row.id);
-            toast.message(`New order #${row.order_number}`);
-            if (audioReady.current) {
-              try {
-                const audio = new Audio("/sounds/new-order.wav");
-                void audio.play();
-              } catch {
-                // Browsers may block sound until a click.
+            if (visible) {
+              toast.message(`New order #${row.order_number}`);
+              if (audioReady.current) {
+                try {
+                  const audio = new Audio("/sounds/new-order.wav");
+                  void audio.play();
+                } catch {
+                  // Browsers may block sound until a click.
+                }
               }
             }
           }
           setOrders((current) => {
             const previous = current.find((order) => order.id === row.id);
             const without = current.filter((order) => order.id !== row.id);
+            if (!visible) return without;
             return [
               {
                 ...previous,
@@ -85,7 +112,7 @@ export function OrderBoard({
       void supabase.removeChannel(channel);
       window.removeEventListener("pointerdown", unlock);
     };
-  }, []);
+  }, [filter?.from, filter?.search, filter?.to]);
 
   const columns = useMemo(
     () => (role === "CASHIER" ? COLUMNS.filter((column) => column.id !== "DONE") : COLUMNS),
@@ -95,16 +122,23 @@ export function OrderBoard({
   const grouped = useMemo(() => {
     return columns.map((column) => ({
       ...column,
-      orders: orders.filter((order) => column.statuses.includes(order.status)),
+      orders: orders
+        .filter((order) => column.statuses.includes(order.status))
+        .sort((a, b) => {
+          const delta = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          return column.id === "DONE" || column.id === "CANCELLED" ? -delta : delta;
+        }),
     }));
   }, [columns, orders]);
 
   return (
     <div
       className={
-        columns.length >= 5
-          ? "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5"
-          : "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
+        columns.length >= 6
+          ? "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6"
+          : columns.length >= 5
+            ? "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5"
+            : "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
       }
     >
       {grouped.map((column) => (
@@ -118,7 +152,7 @@ export function OrderBoard({
           <div className="space-y-3">
             {column.orders.length === 0 ? (
               <p className="text-muted-foreground rounded-xl border border-dashed border-border/80 bg-white/50 px-3 py-8 text-center text-sm">
-                No {ORDER_STATUS_LABELS[column.statuses[0]!].toLowerCase()} orders.
+                No {COLUMN_LABELS[column.id]!.toLowerCase()} orders.
               </p>
             ) : (
               column.orders.map((order) => (

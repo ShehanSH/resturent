@@ -93,6 +93,17 @@ export const collectPaymentSchema = z.object({
   notes: optionalText(300),
 });
 
+export const guestCancelSchema = z.object({
+  token: z
+    .string()
+    .trim()
+    .min(32, "Tracking link is not valid")
+    .max(128, "Tracking link is not valid"),
+  reason: optionalText(300),
+});
+
+export type GuestCancelInput = z.infer<typeof guestCancelSchema>;
+
 export const orderSearchSchema = z.object({
   query: z.string().trim().max(120).optional(),
   status: orderStatusSchema.optional(),

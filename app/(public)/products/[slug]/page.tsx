@@ -59,7 +59,7 @@ export default async function ProductPage({
   );
 
   return (
-    <div className="page-wrap py-8 sm:py-10">
+    <div className="page-wrap py-6 sm:py-8 lg:py-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(item, item.category, settings)) }}
@@ -82,36 +82,61 @@ export default async function ProductPage({
 
       <Link
         href={returnTo}
-        className="mb-6 inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-black/[0.03] hover:text-foreground"
+        className="mb-5 inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-black/[0.03] hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
         Back to menu
       </Link>
 
-      <div className="grid gap-10 lg:grid-cols-2">
-        <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-[color-mix(in_oklch,var(--cream),var(--primary)_8%)] shadow-[0_8px_30px_-12px_rgba(90,18,28,0.15)] lg:aspect-square">
-          <FoodImage src={item.image_url} alt={item.name} sizes="(max-width: 1024px) 100vw, 50vw" />
-        </div>
-        <div>
-          {item.category ? (
-            <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">{item.category.name}</p>
-          ) : null}
-          <h1 className="font-heading mt-1 text-3xl tracking-wide text-primary uppercase sm:text-4xl">{item.name}</h1>
-          <div className="mt-4 text-2xl">
-            <Price price={Number(item.price)} discountPrice={item.discount_price} settings={settings} />
+      <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10 xl:gap-14">
+        <div className="lg:sticky lg:top-[calc(4rem+1.25rem)] lg:self-start">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[color-mix(in_oklch,var(--cream),var(--primary)_8%)] shadow-[0_8px_30px_-12px_rgba(90,18,28,0.15)]">
+            <FoodImage
+              src={item.image_url}
+              alt={item.name}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+              className="object-cover"
+            />
           </div>
-          {item.preparation_time ? (
-            <p className="text-muted-foreground mt-3 flex items-center gap-2 text-sm">
-              <span className="inline-flex size-7 items-center justify-center rounded-lg bg-primary/8">
-                <Clock3 className="size-3.5 text-primary" />
-              </span>
-              About {item.preparation_time} minutes
-            </p>
-          ) : null}
-          {item.description || item.short_description ? (
-            <p className="mt-6 max-w-xl leading-relaxed text-foreground/80">{item.description || item.short_description}</p>
-          ) : null}
-          <div className="mt-8">
+        </div>
+
+        <div className="min-w-0 lg:sticky lg:top-[calc(4rem+1.25rem)] lg:self-start">
+          <header className="border-b border-black/6 pb-5">
+            {item.category ? (
+              <p className="text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+                {item.category.name}
+              </p>
+            ) : null}
+            <div className="mt-1 flex items-start justify-between gap-6">
+              <h1 className="font-heading min-w-0 flex-1 text-3xl tracking-wide text-primary uppercase sm:text-4xl">
+                {item.name}
+              </h1>
+              <div className="shrink-0 text-right text-2xl">
+                <Price
+                  price={Number(item.price)}
+                  discountPrice={item.discount_price}
+                  settings={settings}
+                  layout="stacked"
+                />
+              </div>
+            </div>
+            {item.preparation_time ? (
+              <p className="text-muted-foreground mt-2.5 flex items-center gap-2 text-sm">
+                <span className="inline-flex size-7 items-center justify-center rounded-lg bg-primary/8">
+                  <Clock3 className="size-3.5 text-primary" />
+                </span>
+                About {item.preparation_time} minutes
+              </p>
+            ) : null}
+            {item.description || item.short_description ? (
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-foreground/75">
+                {item.description || item.short_description}
+              </p>
+            ) : null}
+          </header>
+
+          <div className="mt-6">
             <AddToCartForm item={item} settings={settings} returnTo={returnTo} />
           </div>
         </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Pencil, Star } from "lucide-react";
 
 import { deleteFoodItemAction } from "@/app/actions/catalog";
@@ -8,7 +9,7 @@ import { AdminPageHeader, AdminPrimaryLink } from "@/components/admin/page-heade
 import { ProductFilters } from "@/components/admin/product-filters";
 import { DataTable, StatusBadge } from "@/components/admin/ui";
 import { EmptyState } from "@/components/empty-state";
-import { withProductsFilter } from "@/lib/admin-paths";
+import { adminProductHref, adminProductsHref, resolveProductsCategory, withProductsFilter } from "@/lib/admin-paths";
 import { formatMoney } from "@/lib/format";
 import { listCategoriesForAdmin, listFoodItemsForAdmin } from "@/lib/services/catalog.service";
 import { getRestaurantSettings } from "@/lib/services/settings.service";
@@ -19,14 +20,22 @@ export default async function AdminProductsPage({
   const params = await searchParams;
   const search = typeof params.q === "string" ? params.q : undefined;
   const rawCategory = typeof params.category === "string" ? params.category : undefined;
-  const categoryId = rawCategory && rawCategory !== "all" ? rawCategory : undefined;
-  const [settings, categories, result] = await Promise.all([
+  const [settings, categories] = await Promise.all([
     getRestaurantSettings(),
     listCategoriesForAdmin(),
-    listFoodItemsForAdmin({ search, categoryId, page: 1, pageSize: 50 }),
   ]);
-  const filtered = Boolean(search || categoryId);
-  const filter = { q: search, category: categoryId };
+  const resolved = resolveProductsCategory(rawCategory, categories);
+  if (resolved.redirectToSlug) {
+    redirect(adminProductsHref({ q: search, category: resolved.categorySlug }));
+  }
+
+  const categoryId = resolved.categoryId;
+  const filtered = Boolean(search || resolved.categorySlug);
+  const filter = { q: search, category: resolved.categorySlug };
+  const result =
+    resolved.categorySlug && !categoryId
+      ? { items: [], total: 0 }
+      : await listFoodItemsForAdmin({ search, categoryId, page: 1, pageSize: 50 });
   const newHref = withProductsFilter("/admin/products/new", filter);
 
   return (
@@ -38,7 +47,7 @@ export default async function AdminProductsPage({
         action={<AdminPrimaryLink href={newHref}>Add Dish</AdminPrimaryLink>}
       />
 
-      <ProductFilters search={search} categoryId={categoryId} categories={categories} />
+      <ProductFilters search={search} categorySlug={resolved.categorySlug} categories={categories} />
 
       {result.items.length === 0 ? (
         <EmptyState
@@ -87,7 +96,7 @@ export default async function AdminProductsPage({
                   <td>
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
-                        href={withProductsFilter(`/admin/products/${item.id}`, filter)}
+                        href={adminProductHref(item.slug, filter)}
                         className="btn-admin-outline h-9 px-3 text-xs"
                       >
                         <Pencil className="size-3.5" />

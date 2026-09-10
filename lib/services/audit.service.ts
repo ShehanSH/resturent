@@ -34,7 +34,9 @@ export type AuditAction =
   | "staff.updated"
   | "staff.deactivated"
   | "settings.updated"
-  | "sms.retried";
+  | "sms.retried"
+  | "sms.campaign_sent"
+  | "customer.imported";
 
 interface RecordAuditParams {
   profileId: string | null;

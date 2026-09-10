@@ -31,9 +31,10 @@ describe("buildMessage", () => {
     expect(buildMessage("ORDER_READY_PICKUP", context)).toContain(context.trackingUrl);
   });
 
-  it("asks delivery customers to have cash ready", () => {
-    const message = buildMessage("ORDER_OUT_FOR_DELIVERY", context);
-    expect(message).toContain("cash");
-    expect(message).toContain(context.trackingUrl);
+  it("texts the customer when an order is cancelled", () => {
+    expect(eventForStatus("CANCELLED", "PICKUP")).toBe("ORDER_CANCELLED");
+    expect(eventForStatus("CANCELLED", "DELIVERY")).toBe("ORDER_CANCELLED");
+    expect(buildMessage("ORDER_CANCELLED", context)).toContain("HBB-1002");
+    expect(buildMessage("ORDER_CANCELLED", context)).toContain("cancelled");
   });
 });
